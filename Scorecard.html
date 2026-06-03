@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Solution Quality &amp; Risk Scorecard</title>
+<meta name="description" content="A transparent, rule-based triage tool for AI use cases in regulated industries. Scores feasibility, evaluation, risk and responsible-by-design, then returns a Proceed / Pivot / Scale / Stop verdict." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F3EC; --panel:#FBF9F4; --ink:#16140F; --muted:#6B655A;
+    --line:#DDD6C8; --line2:#E8E2D5;
+    --accent:#14564E; --accent-soft:#E3ECE9;
+    --scale:#1E6F75; --proceed:#3F7A4E; --pivot:#B07A1E; --stop:#A83A2C;
+    --scale-bg:#E4EEEF; --proceed-bg:#E6EFE7; --pivot-bg:#F4EBD7; --stop-bg:#F4E2DD;
+    --shadow:0 1px 2px rgba(22,20,15,.04), 0 8px 24px rgba(22,20,15,.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:"IBM Plex Sans",-apple-system,system-ui,sans-serif;
+    font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 1px 1px, rgba(22,20,15,.025) 1px, transparent 0);
+    background-size:22px 22px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 80px;}
+  header.top{padding:38px 0 22px;border-bottom:1px solid var(--line);}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:500;}
+  h1{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(28px,4.4vw,46px);line-height:1.04;margin:10px 0 6px;letter-spacing:-.01em;}
+  .sub{color:var(--muted);max-width:620px;font-size:15.5px;}
+  .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .badge{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.04em;background:var(--accent-soft);color:var(--accent);padding:5px 10px;border-radius:100px;border:1px solid #cfe0db;}
+  .layout{display:grid;grid-template-columns:1fr 410px;gap:30px;margin-top:30px;align-items:start;}
+  @media(max-width:920px){.layout{grid-template-columns:1fr;} .results-col{position:static!important;}}
+
+  .examples{margin:26px 0 8px;}
+  .examples h3, .form-area h3{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0 0 12px;}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;}
+  .chip{cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:13px;text-align:left;color:var(--ink);transition:all .15s;line-height:1.3;font-family:inherit;}
+  .chip:hover{border-color:var(--accent);background:#fff;transform:translateY(-1px);box-shadow:var(--shadow);}
+  .chip .v{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.05em;display:block;margin-top:3px;font-weight:500;}
+  .chip .v.scale{color:var(--scale);} .chip .v.proceed{color:var(--proceed);} .chip .v.pivot{color:var(--pivot);} .chip .v.stop{color:var(--stop);}
+  .reset{cursor:pointer;background:none;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:12px;color:var(--muted);font-family:"IBM Plex Mono",monospace;margin-left:auto;}
+  .modebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .modebtn{cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.04em;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:8px;padding:8px 14px;transition:all .12s;}
+  .modebtn:hover{border-color:var(--accent);color:var(--ink);}
+  .modebtn.on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:500;}
+  .modenote{flex:1;min-width:220px;font-size:12px;color:var(--muted);line-height:1.4;}
+  .reset:hover{color:var(--ink);border-color:var(--muted);}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 20px 8px;margin-bottom:18px;box-shadow:var(--shadow);}
+  .card > .ctitle{display:flex;align-items:baseline;gap:10px;margin:-2px 0 4px;}
+  .ctitle h2{font-family:"Fraunces",serif;font-weight:600;font-size:19px;margin:0;}
+  .ctitle .num{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);font-weight:500;}
+  .ctitle .hint{color:var(--muted);font-size:12.5px;margin-left:auto;}
+
+  .field{padding:14px 0;border-top:1px solid var(--line2);}
+  .field:first-of-type{border-top:none;}
+  .field label.q{display:block;font-weight:500;font-size:14px;margin-bottom:9px;}
+  .field .qnote{color:var(--muted);font-size:12.5px;font-weight:400;}
+  input[type=text], textarea, select{width:100%;font-family:inherit;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 12px;}
+  textarea{resize:vertical;min-height:62px;}
+  select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%236B655A' fill='none' stroke-width='1.5'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+
+  .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+  .seg.three{grid-template-columns:repeat(3,1fr);} .seg.two{grid-template-columns:repeat(2,1fr);} .seg.five{grid-template-columns:repeat(5,1fr);}
+  .seg button{cursor:pointer;font-family:inherit;font-size:12px;line-height:1.25;padding:9px 6px;border:1px solid var(--line);background:#fff;border-radius:8px;color:var(--muted);transition:all .12s;text-align:center;}
+  .seg button:hover{border-color:var(--accent);color:var(--ink);}
+  .seg button.on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:500;}
+  .seg.risk button.on{background:#3a342b;border-color:#3a342b;}
+
+  /* results */
+  .results-col{position:sticky;top:18px;}
+  .verdict{border-radius:16px;padding:22px;border:1px solid var(--line);box-shadow:var(--shadow);transition:background .25s, border-color .25s;}
+  .verdict .vlabel{font-family:"Fraunces",serif;font-size:40px;font-weight:700;line-height:1;letter-spacing:-.02em;display:flex;align-items:center;gap:12px;}
+  .verdict .vdot{width:14px;height:14px;border-radius:50%;flex:none;}
+  .verdict .vmeaning{font-size:13px;margin-top:8px;font-weight:500;}
+  .v-scale{background:var(--scale-bg);border-color:#bcd6d7;} .v-scale .vlabel{color:var(--scale);} .v-scale .vdot{background:var(--scale);}
+  .v-proceed{background:var(--proceed-bg);border-color:#c2d7c4;} .v-proceed .vlabel{color:var(--proceed);} .v-proceed .vdot{background:var(--proceed);}
+  .v-pivot{background:var(--pivot-bg);border-color:#e2cf9e;} .v-pivot .vlabel{color:var(--pivot);} .v-pivot .vdot{background:var(--pivot);}
+  .v-stop{background:var(--stop-bg);border-color:#e0bbb2;} .v-stop .vlabel{color:var(--stop);} .v-stop .vdot{background:var(--stop);}
+
+  .composite{display:flex;align-items:baseline;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(22,20,15,.12);}
+  .composite .num{font-family:"IBM Plex Mono",monospace;font-size:30px;font-weight:600;}
+  .composite .lab{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+
+  .rpanel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px;box-shadow:var(--shadow);}
+  .rpanel h4{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:0 0 12px;}
+  .bar{margin-bottom:12px;}
+  .bar .bl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
+  .bar .bl .bv{font-family:"IBM Plex Mono",monospace;font-weight:500;}
+  .track{height:7px;background:#ECE6D9;border-radius:6px;overflow:hidden;}
+  .track > span{display:block;height:100%;border-radius:6px;transition:width .3s;}
+
+  .rationale{font-size:13.5px;line-height:1.6;color:#332f27;}
+  .guardrail{display:flex;gap:9px;padding:10px 0;border-top:1px solid var(--line2);font-size:13px;}
+  .guardrail:first-child{border-top:none;}
+  .guardrail .gi{flex:none;width:18px;height:18px;border-radius:5px;background:var(--stop-bg);color:var(--stop);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .guardrail.ok .gi{background:var(--proceed-bg);color:var(--proceed);}
+  .risklist li{margin-bottom:6px;font-size:13px;}
+  .risklist .sev{font-family:"IBM Plex Mono",monospace;font-size:11px;padding:1px 6px;border-radius:5px;margin-right:7px;font-weight:500;}
+  .sev.s3{background:var(--stop-bg);color:var(--stop);} .sev.s2{background:var(--pivot-bg);color:var(--pivot);} .sev.s1{background:#EDE9DE;color:var(--muted);} .sev.s0{background:var(--proceed-bg);color:var(--proceed);}
+  .nextstep{font-size:13.5px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;line-height:1.5;}
+  .nextstep b{color:var(--accent);}
+
+  .weights{margin-top:16px;}
+  .wtoggle{cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:none;border:none;padding:6px 0;display:flex;align-items:center;gap:6px;}
+  .wbody{display:none;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:8px;}
+  .wbody.open{display:block;}
+  .wrow{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:13px;}
+  .wrow label{flex:1;}
+  .wrow input[type=range]{flex:1.4;accent-color:var(--accent);}
+  .wrow .wval{font-family:"IBM Plex Mono",monospace;width:38px;text-align:right;font-size:12px;}
+
+  footer{margin-top:42px;border-top:1px solid var(--line);padding-top:22px;color:var(--muted);font-size:12.5px;line-height:1.6;}
+  footer b{color:var(--ink);}
+  footer .priv{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--accent);margin-top:10px;}
+  a{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Decision-support tool &middot; regulated industries</div>
+    <h1>AI Solution Quality &amp; Risk Scorecard</h1>
+    <p class="sub">Score an AI use case across feasibility, evaluation rigor, risk and responsible-by-design. Get a clear <b>Proceed&nbsp;/ Pivot&nbsp;/ Scale&nbsp;/ Stop</b> verdict, the top risks to watch, and the guardrails that fired.</p>
+    <div class="badge-row">
+      <span class="badge">Deterministic &middot; no LLM in the loop</span>
+      <span class="badge">Every score is traceable</span>
+      <span class="badge">Runs fully in your browser</span>
+    </div>
+  </header>
+
+  <div class="examples">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <h3 style="margin:0;">Load an example</h3>
+      <button class="reset" id="resetBtn">Reset to blank</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="layout">
+    <div class="form-area" id="form"></div>
+
+    <div class="results-col">
+      <div class="verdict" id="verdict">
+        <div class="vlabel"><span class="vdot"></span><span id="vtext">—</span></div>
+        <div class="vmeaning" id="vmeaning">Fill the form or load an example to see a verdict.</div>
+        <div class="composite">
+          <span class="num" id="compNum">--</span>
+          <span class="lab">composite&nbsp;quality&nbsp;score / 100</span>
+        </div>
+      </div>
+
+      <div class="rpanel">
+        <h4>Dimension breakdown</h4>
+        <div id="bars"></div>
+      </div>
+
+      <div class="rpanel">
+        <h4>Why this verdict</h4>
+        <div class="rationale" id="rationale">—</div>
+      </div>
+
+      <div class="rpanel">
+        <h4>Responsible-AI guardrails</h4>
+        <div id="guardrails"></div>
+      </div>
+
+      <div class="rpanel">
+        <h4>Top risks to watch</h4>
+        <ul class="risklist" id="risks" style="margin:0;padding-left:0;list-style:none;"></ul>
+      </div>
+
+      <div class="rpanel">
+        <h4>Recommended next step</h4>
+        <div class="nextstep" id="nextstep">—</div>
+      </div>
+
+      <div class="weights">
+        <button class="wtoggle" id="wtoggle">▸ Adjust weights (advanced)</button>
+        <div class="wbody" id="wbody">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;">Weights are visible and editable so the tool imposes no hidden value judgment. Defaults reflect a regulated-industry posture: risk and responsible-design carry more weight.</div>
+          <div class="wrow"><label>Feasibility</label><input type="range" min="0" max="50" id="w_feas"><span class="wval" id="wv_feas"></span></div>
+          <div class="wrow"><label>Evaluation</label><input type="range" min="0" max="50" id="w_eval"><span class="wval" id="wv_eval"></span></div>
+          <div class="wrow"><label>Risk (lower is better)</label><input type="range" min="0" max="50" id="w_risk"><span class="wval" id="wv_risk"></span></div>
+          <div class="wrow"><label>Responsible-by-design</label><input type="range" min="0" max="50" id="w_resp"><span class="wval" id="wv_resp"></span></div>
+          <div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;">Weights are normalised to 100%.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <b>How to read this.</b> This is a structured aid to human judgment, not a decision-maker. It does not use an AI model to score your use case; it applies a fixed, visible rule set, so the same inputs always give the same result and every point can be traced back to an answer you selected. The verdict reflects what you entered, which is an estimate, and it is a self-assessment, so a second independent reviewer reduces individual bias. It does not replace a Data Protection Impact Assessment, GxP validation, security review, fairness testing, or sign-off from accountable owners. Guardrails can only lower a verdict, never raise it, and the guardrails depend only on the high-signal inputs shown, so a rapid triage cannot hide a red line.
+    <div class="priv">Methodology v1.0 &middot; informed by the NIST AI Risk Management Framework, the OECD AI Principles, the EU AI Act risk tiers, Good Machine Learning Practice, and WHO guidance on AI for health &middot; calibrated for regulated clinical and digital-health settings.</div>
+    <div class="priv">Privacy by design: nothing you type leaves this page. No storage, no analytics, no network calls.</div>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG  — drives both the UI and the scoring. Fully transparent.
+   For positive dimensions, higher option score = better (0..3).
+   For the risk dimension, higher option score = MORE risk (0..3).
+   ============================================================ */
+const CONTEXT = [
+  {id:"name", type:"text", tier:1, q:"Use case name", ph:"e.g. GenAI drafting of data management plans"},
+  {id:"desc", type:"textarea", tier:2, q:"Short description", ph:"What it does, for whom, and the decision or task it supports."},
+  {id:"solutionType", type:"select", tier:2, q:"Solution type",
+    options:["GenAI / LLM","Agentic AI","Workflow automation","Predictive / classic ML","Other"]},
+  {id:"sourcing", type:"select", tier:2, q:"Build, buy or borrow",
+    options:["Build (in-house)","Buy (vendor product)","Borrow (third-party API / open source)"]},
+  {id:"dataSensitivity", type:"select", tier:1, q:"Highest data sensitivity involved",
+    options:["Public","Internal","Confidential (business)","Personal data (GDPR)","Special-category / patient data"]},
+  {id:"regulated", type:"select", tier:1, q:"Regulated (GxP) context",
+    options:["No","Partial","Yes — GxP / regulated"]},
+  {id:"oversight", type:"select", tier:1, q:"Human oversight model",
+    options:["Human decides (AI assists)","Human reviews every output","Human monitors (on the loop)","Fully autonomous"]},
+];
+
+const DIMS = [
+  {key:"feas", name:"Feasibility & solution logic", kind:"pos", num:"01", questions:[
+    {id:"F1", tier:1, q:"Problem definition & success metric", opts:[
+      "Vague problem, no metric","Rough idea, no agreed metric","Clear problem, draft metric","Clear problem, agreed measurable metric"]},
+    {id:"F2", tier:2, q:"Data availability & access", opts:[
+      "Doesn't exist / inaccessible","Major access or quality gaps","Available with some prep","Available, accessible, adequate quality"]},
+    {id:"F3", tier:2, q:"Technical approach maturity", opts:[
+      "Unproven / research-grade","Emerging, few production examples","Proven pattern, some adaptation","Well-established production pattern"]},
+  ]},
+  {key:"eval", name:"Evaluation rigor", kind:"pos", num:"02", questions:[
+    {id:"E1", tier:1, q:"Evaluation method", opts:[
+      "None","Informal spot-checks","Defined method, not yet built","Built: metrics + test / golden set"]},
+    {id:"E2", tier:2, q:"Ground truth / expert benchmark", opts:[
+      "No way to measure correctness","Subjective only","Structured expert review","Quantitative vs ground truth + monitoring"]},
+  ]},
+  {key:"risk", name:"Risk & failure modes", kind:"risk", num:"03", hint:"higher = more risk", questions:[
+    {id:"R1", tier:1, q:"Hallucination / factual-error likelihood", opts:["Low","Moderate","High","Critical"]},
+    {id:"R2", tier:1, q:"Data leakage / confidentiality exposure", opts:["Low","Moderate","High","Critical"]},
+    {id:"R3", tier:2, q:"Workflow fit (will people actually use it)", opts:["Fits cleanly","Minor friction","Significant change needed","Conflicts with how work is done"]},
+    {id:"R4", tier:2, q:"Scalability constraints", opts:["None","Some","Significant","Blocking"]},
+    {id:"R5", tier:2, q:"Vendor overclaim / lock-in dependency", opts:["Low / N-A","Some","High","Critical"]},
+    {id:"R6", tier:1, q:"Consequence if it is wrong (stakes)", opts:["Low","Moderate","High","Severe (patient / regulatory)"]},
+  ]},
+  {key:"resp", name:"Responsible-by-design", kind:"pos", num:"04", questions:[
+    {id:"RD1", tier:1, q:"Privacy / GDPR handling", opts:[
+      "Not considered","Identified, no plan","Plan in place","Designed in: minimization, lawful basis, DPIA where needed"]},
+    {id:"RD2", tier:2, q:"Auditability / traceability", opts:[
+      "None","Limited logging","Logged, partly reviewable","Full traceability: inputs, versions, decisions"]},
+    {id:"RD3", tier:2, q:"GxP / regulatory fit", naIndex:0, opts:[
+      "Not applicable","Not addressed in regulated context","Identified","Controls drafted","Validated approach aligned to GxP"]},
+    {id:"RD4", tier:1, q:"Human oversight matched to stakes", opts:[
+      "No oversight where needed","Minimal","Review on a sample","Oversight matched to risk level"]},
+    {id:"RD5", tier:1, q:"Bias & subgroup fairness", opts:[
+      "Not considered","Identified, not tested","Tested on overall population only","Evaluated across relevant subgroups, with monitoring"]},
+  ]},
+];
+
+/* Worst-case (most risk) labels for naming top risks */
+const RISK_NAMES = {R1:"Hallucination / factual error",R2:"Data leakage",R3:"Poor workflow fit",R4:"Scalability",R5:"Vendor overclaim / lock-in",R6:"High-stakes error consequence"};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const blank = {mode:"quick", ctx:{name:"",desc:"",solutionType:0,sourcing:0,dataSensitivity:1,regulated:0,oversight:1},
+  ans:{F1:2,F2:2,F3:2,E1:2,E2:2,R1:1,R2:1,R3:1,R4:1,R5:1,R6:1,RD1:2,RD2:2,RD3:3,RD4:2,RD5:2},
+  weights:{feas:25,eval:20,risk:30,resp:25}};
+let S = JSON.parse(JSON.stringify(blank));
+
+/* ============================================================
+   SCORING ENGINE  (pure function — also unit-testable in Node)
+   ============================================================ */
+function compute(state){
+  const a = state.ans, c = state.ctx;
+  const has = id => a[id]!==undefined && a[id]!==null;
+
+  // RD3 N-A handling: option index 0 means "Not applicable" -> excluded, scored on 0..3 scale via (idx-1)
+  function respScore(id){
+    if(!has(id)) return null;
+    if(id==="RD3"){ return a[id]===0 ? null : a[id]-1; } // map 1..4 -> 0..3
+    return a[id];
+  }
+  const avg = arr => { const v=arr.filter(x=>x!==null); return v.length? v.reduce((p,q)=>p+q,0)/v.length : null; };
+
+  const feasRaw = avg(["F1","F2","F3"].map(id=>has(id)?a[id]:null));
+  const evalRaw = avg(["E1","E2"].map(id=>has(id)?a[id]:null));
+  const riskRaw = avg(["R1","R2","R3","R4","R5","R6"].map(id=>has(id)?a[id]:null)); // higher worse
+  const respRaw = avg(["RD1","RD2","RD3","RD4","RD5"].map(id=>respScore(id)));
+
+  const to100 = v => v===null? null : Math.round(v/3*100);
+  const feas = to100(feasRaw);
+  const ev   = to100(evalRaw);
+  const riskSafety = riskRaw===null? null : Math.round((3-riskRaw)/3*100); // higher = safer
+  const resp = to100(respRaw);
+
+  // composite (normalised weights). Missing dimensions are dropped from the weighting.
+  const wmap = {feas:[feas,state.weights.feas],eval:[ev,state.weights.eval],risk:[riskSafety,state.weights.risk],resp:[resp,state.weights.resp]};
+  let wsum=0, acc=0, anyAnswered=false;
+  for(const k in wmap){ const [val,w]=wmap[k]; if(val!==null){ acc+=val*w; wsum+=w; anyAnswered=true; } }
+  const composite = anyAnswered? Math.round(acc/wsum) : null;
+
+  // ---- base verdict from composite bands ----
+  const RANK={Stop:1,Pivot:2,Proceed:3,Scale:4};
+  const NAMEBYRANK={1:"Stop",2:"Pivot",3:"Proceed",4:"Scale"};
+  let baseRank;
+  if(composite===null) baseRank=null;
+  else if(composite>=75) baseRank=4;
+  else if(composite>=55) baseRank=3;
+  else if(composite>=40) baseRank=2;
+  else baseRank=1;
+
+  // ---- guardrails (can only LOWER the verdict) ----
+  const sensitive = c.dataSensitivity>=3;            // personal or special-category
+  const special   = c.dataSensitivity>=4;            // patient / special-category
+  const autonomous= c.oversight===3;
+  const highStakes= (has("R6")&&a.R6>=2) || c.regulated===2;
+  const gates=[];
+  let cap=Infinity;
+  function gate(maxRank,label,detail,cond){ if(cond){ gates.push({maxRank,label,detail}); cap=Math.min(cap,maxRank);} }
+
+  // A. Data-protection red line
+  gate(1,"Data-protection red line",
+    "Special-category / patient data with high leakage risk and no adequate privacy plan. Cannot proceed until data handling is fixed.",
+    special && has("R2")&&a.R2>=3 && (!has("RD1")||a.RD1<2));
+  gate(2,"Data-protection guardrail",
+    "Personal or special-category data carries meaningful leakage risk before privacy controls are in place. Reshape the data flow first.",
+    sensitive && has("R2")&&a.R2>=2 && (!has("RD1")||a.RD1<2) && !(special && has("R2")&&a.R2>=3 && (!has("RD1")||a.RD1<2)));
+
+  // B. Evaluation gate (can't scale what you can't measure) — keys off the primary, always-visible question
+  gate(2,"No evaluation method",
+    "There is no usable way to measure whether outputs are correct. Define evaluation before building further.",
+    has("E1") && a.E1<1);
+  gate(3,"Evaluation not yet proven",
+    "Evaluation is defined but not yet demonstrated at quality. Pilot and prove it before scaling.",
+    has("E1") && (a.E1===1 || a.E1===2));
+
+  // C. Autonomy / high-stakes gate
+  gate(2,"Autonomy vs stakes mismatch",
+    "A fully autonomous design in a high-stakes or regulated context with material error risk needs human oversight added before it proceeds.",
+    autonomous && highStakes && has("R1")&&a.R1>=2);
+
+  // D. Critical-risk ceiling
+  gate(3,"Unresolved critical risk",
+    "A critical-severity risk is present. It cannot scale until that risk is mitigated and re-scored.",
+    (has("R1")&&a.R1>=3)||(has("R2")&&a.R2>=3)||(has("R6")&&a.R6>=3));
+
+  // E. Fairness gate — a use that materially affects people must be checked for bias
+  gate(2,"Fairness unassessed for a high-stakes use",
+    "This use case can materially affect people, but bias and subgroup performance have not been assessed. Evaluate fairness before it proceeds.",
+    has("R6")&&a.R6>=2 && has("RD5")&&a.RD5<=0);
+
+  let finalRank = baseRank;
+  if(finalRank!==null && cap!==Infinity) finalRank=Math.min(finalRank,cap);
+  const verdict = finalRank? NAMEBYRANK[finalRank] : null;
+  const cappedByGate = baseRank!==null && finalRank!==null && finalRank<baseRank;
+
+  // ---- top risks ----
+  const topRisks = ["R1","R2","R3","R4","R5","R6"].filter(has).map(id=>({id,name:RISK_NAMES[id],sev:a[id]}))
+    .sort((x,y)=>y.sev-x.sev).filter(r=>r.sev>0).slice(0,3);
+
+  return {feas,ev,riskSafety,riskRaw,resp,composite,verdict,baseName:baseRank?NAMEBYRANK[baseRank]:null,cappedByGate,gates,topRisks,
+    flags:{sensitive,special,autonomous,highStakes}};
+}
+
+/* deterministic, templated rationale (no generative text) */
+function rationale(r,state){
+  if(r.composite===null) return "Answer the questions to generate a rationale. Every sentence here is assembled from your inputs.";
+  const c=state.ctx;
+  const lvl=(v)=> v===null?"not yet scored": v>=75?"strong": v>=55?"adequate": v>=40?"limited":"weak";
+  let s=[];
+  s.push(`Feasibility is <b>${lvl(r.feas)}</b> (${r.feas}/100) and evaluation rigor is <b>${lvl(r.ev)}</b> (${r.ev}/100).`);
+  s.push(`Risk posture scores <b>${lvl(r.riskSafety)}</b> (${r.riskSafety}/100, higher means safer) and responsible-by-design is <b>${lvl(r.resp)}</b> (${r.resp}/100).`);
+  if(r.topRisks.length){ s.push(`The dominant risks are ${r.topRisks.map(x=>x.name.toLowerCase()).join(", ")}.`); }
+  if(r.cappedByGate){
+    s.push(`The composite alone would suggest <b>${r.baseName}</b>, but a responsible-AI guardrail caps it at <b>${r.verdict}</b> — see the guardrails panel.`);
+  } else {
+    const why = r.verdict==="Scale"?"high quality across the board with low residual risk":
+                r.verdict==="Proceed"?"a workable case with manageable risk":
+                r.verdict==="Pivot"?"real value held back by a fixable weakness":
+                "a critical gap or low value in its current form";
+    s.push(`Verdict is <b>${r.verdict}</b>: ${why}.`);
+  }
+  return s.join(" ");
+}
+function nextStepText(r){
+  if(!r.verdict) return "—";
+  const m={
+    Scale:"<b>Scale.</b> Confirm a validated evaluation runs in production, define monitoring thresholds and an owner, then expand to the next workflow. Re-score after each expansion.",
+    Proceed:"<b>Proceed to a scoped pilot.</b> Lock the success metric, stand up the evaluation harness, and set the human-oversight checkpoint before any production exposure.",
+    Pivot:"<b>Pivot before building.</b> Address the capping issue (see guardrails) — usually data handling, oversight, or evaluation — then re-score. The underlying idea has merit.",
+    Stop:"<b>Stop in the current form.</b> A critical gap or low value outweighs the upside. Either redesign around the red-line issue or redirect the effort, then re-assess."
+  };
+  return m[r.verdict];
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!==undefined)e.innerHTML=html;return e;}
+
+function buildForm(){
+  const form=document.getElementById("form");
+  form.innerHTML="";
+  const quick = true;
+
+  // helper note (rapid-triage scope + live scoring)
+  const mt=el("div","modebar");
+  mt.appendChild(el("span","modenote","A verdict updates live as you answer, with no submit button. This is a rapid triage; secondary factors such as auditability, vendor lock-in and validation fit use neutral defaults."));
+  form.appendChild(mt);
+
+  // context card
+  const cc=el("div","card");
+  cc.appendChild(ctitle("00","Context",""));
+  CONTEXT.forEach(f=>{
+    if(quick && f.tier===2) return;
+    const fld=el("div","field");
+    fld.appendChild(el("label","q",f.q));
+    if(f.type==="text"){const i=el("input");i.type="text";i.placeholder=f.ph||"";i.value=S.ctx[f.id]||"";i.oninput=e=>{S.ctx[f.id]=e.target.value;};fld.appendChild(i);}
+    else if(f.type==="textarea"){const t=el("textarea");t.placeholder=f.ph||"";t.value=S.ctx[f.id]||"";t.oninput=e=>{S.ctx[f.id]=e.target.value;};fld.appendChild(t);}
+    else if(f.type==="select"){const sel=el("select");f.options.forEach((o,i)=>{const op=el("option",null,o);op.value=i;sel.appendChild(op);});sel.value=S.ctx[f.id];sel.onchange=e=>{S.ctx[f.id]=+e.target.value;render();};fld.appendChild(sel);}
+    cc.appendChild(fld);
+  });
+  form.appendChild(cc);
+
+  // dimension cards
+  DIMS.forEach(d=>{
+    const qs = quick ? d.questions.filter(q=>q.tier===1) : d.questions;
+    if(!qs.length) return;
+    const card=el("div","card");
+    card.appendChild(ctitle(d.num,d.name,d.hint||""));
+    qs.forEach(q=>{
+      const fld=el("div","field");
+      fld.appendChild(el("label","q",q.q));
+      const seg=el("div","seg"+(d.kind==="risk"?" risk":"")+(q.opts.length===5?" five":q.opts.length===3?" three":q.opts.length===2?" two":""));
+      q.opts.forEach((o,i)=>{
+        const b=el("button",null,o);
+        if(S.ans[q.id]===i) b.classList.add("on");
+        b.onclick=()=>{S.ans[q.id]=i;render();};
+        seg.appendChild(b);
+      });
+      fld.appendChild(seg);
+      card.appendChild(fld);
+    });
+    form.appendChild(card);
+  });
+}
+function ctitle(num,name,hint){
+  const t=el("div","ctitle");
+  t.appendChild(el("span","num",num));
+  t.appendChild(el("h2",null,name));
+  if(hint) t.appendChild(el("span","hint",hint));
+  return t;
+}
+
+function render(){
+  buildForm();
+  renderResults();
+  syncWeights();
+}
+
+function renderResults(){
+  const r=compute(S);
+  const vbox=document.getElementById("verdict");
+  vbox.className="verdict"+(r.verdict?(" v-"+r.verdict.toLowerCase()):"");
+  document.getElementById("vtext").textContent=r.verdict||"—";
+  const meanings={Scale:"This works — expand it.",Proceed:"Green light for a scoped pilot.",Pivot:"Valuable, but reshape before building.",Stop:"Do not build in current form."};
+  document.getElementById("vmeaning").textContent=r.verdict?meanings[r.verdict]:"Fill the form or load an example to see a verdict.";
+  document.getElementById("compNum").textContent=r.composite===null?"--":r.composite;
+
+  // bars
+  const bars=document.getElementById("bars");bars.innerHTML="";
+  const colorFor=v=>v===null?"#ccc":v>=70?"var(--proceed)":v>=45?"var(--pivot)":"var(--stop)";
+  [["Feasibility",r.feas],["Evaluation",r.ev],["Risk (safety)",r.riskSafety],["Responsible-by-design",r.resp]].forEach(([lab,v])=>{
+    const b=el("div","bar");
+    b.innerHTML=`<div class="bl"><span>${lab}</span><span class="bv">${v===null?"—":v}</span></div><div class="track"><span style="width:${v===null?0:v}%;background:${colorFor(v)}"></span></div>`;
+    bars.appendChild(b);
+  });
+
+  document.getElementById("rationale").innerHTML=rationale(r,S);
+  document.getElementById("nextstep").innerHTML=nextStepText(r);
+
+  // guardrails
+  const g=document.getElementById("guardrails");g.innerHTML="";
+  if(r.composite===null){g.innerHTML='<div style="font-size:13px;color:var(--muted)">No guardrails evaluated yet.</div>';}
+  else if(r.gates.length===0){
+    const row=el("div","guardrail ok");
+    row.innerHTML='<span class="gi">&#10003;</span><div>No guardrails triggered. The verdict follows directly from the composite score.</div>';
+    g.appendChild(row);
+  } else {
+    r.gates.forEach(gt=>{
+      const row=el("div","guardrail");
+      row.innerHTML=`<span class="gi">!</span><div><b>${gt.label}</b> &mdash; caps verdict at <b>${({1:"Stop",2:"Pivot",3:"Proceed",4:"Scale"})[gt.maxRank]}</b>. ${gt.detail}</div>`;
+      g.appendChild(row);
+    });
+  }
+
+  // risks
+  const rl=document.getElementById("risks");rl.innerHTML="";
+  if(!r.topRisks.length){rl.innerHTML='<li style="color:var(--muted);font-size:13px">No material risks flagged yet.</li>';}
+  else r.topRisks.forEach(rk=>{
+    const sevLab=["Low","Moderate","High","Critical"][rk.sev];
+    const li=el("li");
+    li.innerHTML=`<span class="sev s${rk.sev}">${sevLab}</span>${rk.name}`;
+    rl.appendChild(li);
+  });
+}
+
+/* weights */
+function syncWeights(){
+  const keys=["feas","eval","risk","resp"];
+  keys.forEach(k=>{
+    const inp=document.getElementById("w_"+k); const lab=document.getElementById("wv_"+k);
+    if(!inp)return; inp.value=S.weights[k];
+    const total=keys.reduce((p,q)=>p+S.weights[q],0)||1;
+    lab.textContent=Math.round(S.weights[k]/total*100)+"%";
+  });
+}
+["feas","eval","risk","resp"].forEach(k=>{
+  document.getElementById("w_"+k).addEventListener("input",e=>{S.weights[k]=+e.target.value;renderResults();syncWeights();});
+});
+document.getElementById("wtoggle").onclick=function(){
+  const b=document.getElementById("wbody"); b.classList.toggle("open");
+  this.textContent=(b.classList.contains("open")?"▾":"▸")+" Adjust weights (advanced)";
+};
+
+/* ============================================================
+   EXAMPLES  (run through the real engine — verdicts are computed, not hard-coded)
+   ============================================================ */
+const EXAMPLES=[
+  {title:"ML-assisted SDTM mapping with CDISC conformance checks", expect:"Scale", v:"scale",
+   ctx:{name:"AI-assisted SDTM mapping + CDISC conformance",desc:"A model proposes raw-to-SDTM variable mappings and runs CDISC conformance checks. A standards programmer reviews and approves every mapping. Validated against published CDISC rules and prior study outputs.",solutionType:0,sourcing:0,dataSensitivity:3,regulated:2,oversight:2},
+   ans:{F1:3,F2:3,F3:2,E1:3,E2:2,R1:1,R2:0,R3:0,R4:1,R5:0,R6:1,RD1:3,RD2:3,RD3:4,RD4:3,RD5:3}},
+  {title:"GenAI drafts data management plans & edit-check specs", expect:"Proceed", v:"proceed",
+   ctx:{name:"GenAI first-draft of DMPs and edit-check specifications",desc:"An LLM produces first drafts of data management plans and edit-check specifications from the protocol and CRF. A lead data manager reviews and approves every output before use.",solutionType:0,sourcing:1,dataSensitivity:2,regulated:2,oversight:1},
+   ans:{F1:3,F2:2,F3:2,E1:2,E2:2,R1:2,R2:1,R3:1,R4:1,R5:1,R6:2,RD1:2,RD2:2,RD3:3,RD4:3,RD5:2}},
+  {title:"Agentic AI auto-resolves EDC queries (autonomous)", expect:"Pivot", v:"pivot",
+   ctx:{name:"Autonomous agent closes EDC data queries",desc:"An agent reads EDC discrepancies and auto-resolves and closes routine queries end to end, with no human in the resolution loop, inside a validated clinical database.",solutionType:1,sourcing:0,dataSensitivity:4,regulated:2,oversight:3},
+   ans:{F1:3,F2:2,F3:1,E1:2,E2:2,R1:2,R2:1,R3:1,R4:1,R5:1,R6:2,RD1:2,RD2:2,RD3:3,RD4:1,RD5:2}},
+  {title:"Autonomous AI eligibility screening in a decentralized trial", expect:"Stop", v:"stop",
+   ctx:{name:"Autonomous eligibility screening & enrollment in a DCT app",desc:"A patient-facing decentralized-trial app uses a third-party model to screen eligibility and enroll participants in real time, with no clinician or coordinator in the loop and patient data sent off-platform.",solutionType:1,sourcing:2,dataSensitivity:4,regulated:2,oversight:3},
+   ans:{F1:2,F2:1,F3:2,E1:1,E2:1,R1:3,R2:2,R3:2,R4:1,R5:2,R6:3,RD1:1,RD2:1,RD3:2,RD4:0,RD5:0}},
+];
+function buildChips(){
+  const c=document.getElementById("chips");c.innerHTML="";
+  EXAMPLES.forEach((ex,i)=>{
+    const b=el("button","chip");
+    b.innerHTML=`${ex.title}<span class="v ${ex.v}">→ likely ${ex.expect.toUpperCase()}</span>`;
+    b.onclick=()=>{S=JSON.parse(JSON.stringify({mode:"quick",ctx:ex.ctx,ans:ex.ans,weights:blank.weights}));render();window.scrollTo({top:0,behavior:"smooth"});};
+    c.appendChild(b);
+  });
+}
+document.getElementById("resetBtn").onclick=()=>{S=JSON.parse(JSON.stringify(blank));render();};
+
+/* boot */
+buildChips();
+render();
+</script>
+</body>
+</html>

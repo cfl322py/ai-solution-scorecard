@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>About · AI Solution Quality &amp; Risk Scorecard</title>
+<meta name="description" content="Why I built a transparent, rule-based scorecard for triaging AI use cases in regulated industries, and how it works." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F1E8; --panel:#FBF9F3; --ink:#181510; --muted:#6E685B; --soft:#8A8475;
+    --line:#DDD6C7; --rule:#C8BFAD; --accent:#14564E; --accentpaper:#E7EFEC;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:18px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 1px 1px, rgba(24,21,16,.025) 1px, transparent 0);
+    background-size:24px 24px;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 26px 100px;}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:500;}
+  header.hero{padding:84px 0 40px;border-bottom:1px solid var(--line);}
+  h1{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(34px,6vw,58px);line-height:1.03;letter-spacing:-.015em;margin:16px 0 18px;}
+  .lede{font-size:21px;color:var(--ink);max-width:620px;}
+  .cta{display:inline-flex;align-items:center;gap:9px;margin-top:30px;background:var(--ink);color:var(--paper);
+    text-decoration:none;font-weight:500;font-size:16px;padding:13px 22px;border-radius:10px;transition:transform .15s;}
+  .cta:hover{transform:translateY(-1px);}
+  .cta .arrow{font-family:"IBM Plex Mono",monospace;}
+  .meta{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--soft);margin-top:22px;letter-spacing:.03em;}
+
+  section{padding:46px 0;border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  h2{font-family:"Fraunces",serif;font-weight:600;font-size:30px;letter-spacing:-.01em;margin-bottom:18px;}
+  p{margin-bottom:18px;}
+  p:last-child{margin-bottom:0;}
+  .lead-in{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:10px;}
+  strong{font-weight:600;}
+  .design-point{padding:18px 0;border-top:1px solid var(--line);}
+  .design-point:first-of-type{border-top:none;}
+  .design-point b{font-family:"Fraunces",serif;font-weight:600;font-size:21px;display:block;margin-bottom:5px;}
+  .callout{background:var(--accentpaper);border:1px solid #cfe0db;border-radius:14px;padding:22px 24px;font-size:17px;}
+  .callout .lead-in{color:var(--accent);}
+  footer{padding-top:42px;color:var(--muted);font-size:15px;line-height:1.6;}
+  footer .name{font-family:"Fraunces",serif;font-size:20px;color:var(--ink);font-weight:600;}
+  footer a{color:var(--accent);}
+  .fineprint{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--soft);margin-top:20px;letter-spacing:.02em;line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">A portfolio project</div>
+    <h1>AI Solution Quality &amp; Risk Scorecard</h1>
+    <p class="lede">A transparent, rule-based way to triage AI use cases in regulated industries, and get a verdict you can defend.</p>
+    <a class="cta" href="[your tool link]">Open the scorecard <span class="arrow">→</span></a>
+    <div class="meta">Built by Caroline Flessa, MPH · Clinical data &amp; digital health</div>
+  </header>
+
+  <section>
+    <div class="lead-in">Why I built it</div>
+    <p>Most AI pilots in pharma stall for the same reason. Nobody scored them honestly before the build started. A use case that sounds promising in a workshop turns out to have no way to measure whether its outputs are correct, or it sends patient data to a third-party model, or it automates a decision a regulator expects a person to make.</p>
+    <p>I wanted a simple way to ask those questions up front, in language a regulated-industry team already uses, and to get back a defensible recommendation instead of a gut call.</p>
+  </section>
+
+  <section>
+    <div class="lead-in">What it does</div>
+    <p>You describe a use case and answer a short set of questions. The tool returns a composite quality score, a clear verdict of Proceed, Pivot, Scale, or Stop, a breakdown across four dimensions, the top risks ranked by severity, a plain-language rationale, and any responsible-AI guardrails that fired.</p>
+    <p>Four worked examples load with one click, one for each verdict, all drawn from clinical data and digital health: ML-assisted CDISC mapping (Scale), GenAI drafting of data management plans (Proceed), autonomous EDC query resolution (Pivot), and autonomous eligibility screening in a decentralized trial (Stop). You can see how the same engine separates a low-risk internal tool from a high-stakes autonomous one.</p>
+  </section>
+
+  <section>
+    <h2>Design decisions</h2>
+    <p style="margin-bottom:8px;">I made four choices on purpose, because a tool that scores AI risk should hold itself to the same standard it applies.</p>
+    <div class="design-point"><b>It is deterministic.</b>No model judges your use case. The scoring is a fixed rule set, so the same inputs always give the same verdict, and every point traces back to an answer you selected.</div>
+    <div class="design-point"><b>The weights are visible and editable.</b>Defaults reflect a regulated posture, with risk and responsible-design weighted higher. You can change them, so the tool imposes no hidden value judgment.</div>
+    <div class="design-point"><b>Guardrails can only lower a verdict.</b>A data-protection red line or a missing evaluation method caps the result no matter how strong the rest of the score looks.</div>
+    <div class="design-point"><b>It runs entirely in your browser.</b>Nothing you enter leaves the page. No storage, no analytics, no network calls. Privacy by design, not as an optional setting.</div>
+  </section>
+
+  <section>
+    <div class="lead-in">How scoring works</div>
+    <p>Each dimension is scored from its questions on a 0 to 100 scale. The composite is a weighted average of feasibility, evaluation, an inverted risk score where lower risk scores higher, and responsible-by-design. The composite maps to a base verdict by band, and the guardrails can only cap the result lower. The verdict you see is the lower of the base band and any guardrail ceiling.</p>
+  </section>
+
+  <section>
+    <h2>What the rubric considers</h2>
+    <p>The live tool is a rapid triage. It surfaces the factors that move a verdict the most and applies neutral defaults to the rest, so you get an answer fast. A complete review weighs all of the following, which is the full rubric behind the engine:</p>
+    <div class="design-point"><b>Feasibility</b>Problem definition and success metric, data availability and access, technical approach maturity.</div>
+    <div class="design-point"><b>Evaluation</b>Whether an evaluation method exists, and whether there is a ground-truth or expert benchmark to measure against.</div>
+    <div class="design-point"><b>Risk and failure modes</b>Hallucination and factual error, data leakage, workflow fit and adoption, scalability, vendor overclaim and lock-in, and the consequence if the system is wrong.</div>
+    <div class="design-point"><b>Responsible-by-design</b>Privacy and GDPR handling, auditability and traceability, GxP and regulatory validation fit, human oversight matched to the stakes, and bias and subgroup fairness.</div>
+  </section>
+
+  <section>
+    <h2>How I built it</h2>
+    <p>I designed the rubric. The dimensions, the questions, the severity levels, the gating logic, and the weighting come from my work in clinical data management and digital health inside GxP-regulated environments. That judgment is the part that matters, and it is mine.</p>
+    <p>I used AI to generate the implementation. I specified the model, reviewed the logic, and wrote a small test that runs all the examples through the scoring engine to confirm each produces the intended verdict before shipping. The code is AI-assisted. The criteria, the decisions, and the verification are my own. I am stating this plainly because building responsibly with AI includes being honest about how you built it.</p>
+    <div class="callout">
+      <div class="lead-in">What shaped it</div>
+      A principle from <strong>Winning with AI</strong> by Charlene Li and Dr. Katia Walsh: most organizations stall running pilots, and the ones that create real value learn to prioritize and govern responsibly. This scorecard is one attempt to put that into practice.
+    </div>
+  </section>
+
+  <section>
+    <h2>Methodology, frameworks and assumptions</h2>
+    <p>The rubric is informed by recognized responsible-AI frameworks and adapted for clinical and digital-health work: the NIST AI Risk Management Framework (its Govern, Map, Measure and Manage functions), the OECD AI Principles, the EU AI Act's risk-tiering logic, Good Machine Learning Practice for medical-device software, and WHO guidance on AI for health. The four dimensions and the guardrails map onto those sources rather than being invented from scratch.</p>
+    <p>I have tried to state the design assumptions plainly rather than hide them:</p>
+    <div class="design-point"><b>Composite scoring is compensatory; guardrails are not.</b>A strength in one dimension can offset a weakness in the blended score, which is why the guardrails sit on top. They enforce non-negotiable floors (data protection, evaluation, autonomy versus stakes, critical risk, fairness) and can only lower a verdict, never raise it.</div>
+    <div class="design-point"><b>Guardrails depend only on high-signal inputs.</b>The rapid triage uses neutral defaults for secondary factors, but every guardrail keys off a question the user actually answers, so a fast assessment cannot hide a red line.</div>
+    <div class="design-point"><b>The thresholds and weights are conventions, not validated cutoffs.</b>The band boundaries and the dimension weights reflect a regulated-industry posture, with risk and responsible-design weighted higher. They are reasoned defaults, not empirically calibrated, and the weights are visible and adjustable.</div>
+    <div class="design-point"><b>It is a self-assessment.</b>One person scoring their own use case will tend to rate it kindly. A second independent reviewer materially reduces that bias, and the tool is designed to start a conversation, not end one.</div>
+  </section>
+
+  <section>
+    <div class="lead-in">Limitations and out-of-scope</div>
+    <p>This is a decision-support aid, not a decision-maker. The verdict reflects what you enter, which is an estimate. It does not replace a Data Protection Impact Assessment, GxP validation, a security review, fairness and subgroup testing, or sign-off from accountable owners. It is not a vendor-ranking or procurement instrument, and it does not assess a specific model's measured performance. Treat the output as a structured starting point for a conversation, not a control.</p>
+  </section>
+
+  <footer>
+    <div class="name">Caroline Flessa, MPH</div>
+    <p style="margin-top:6px;">Clinical data and digital health. I work on data quality, EDC and eCOA, CDISC standards, and the responsible use of AI and patient-generated data in regulated settings.</p>
+    <p><a href="[your LinkedIn]">LinkedIn</a> &nbsp;·&nbsp; <a href="mailto:[your email]">Email</a> &nbsp;·&nbsp; <a href="[your tool link]">Open the scorecard</a></p>
+    <div class="fineprint">Built with AI assistance and human judgment. The scoring methodology is my own; the implementation was AI-assisted and verified by me. The tool runs entirely in your browser and stores nothing.</div>
+  </footer>
+
+</div>
+</body>
+</html>
