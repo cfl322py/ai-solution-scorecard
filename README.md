@@ -77,7 +77,7 @@ This is a decision-support aid, not a decision-maker. The verdict reflects what 
 
 One self-contained HTML file. Basic JavaScript, no framework, no build step. The only external dependency is Google Fonts. Deploys as-is to GitHub Pages, Netlify, Vercel, Cloudflare Pages, or any static host.
 
-To run locally, open `Scorecard.html` in a browser. To deploy, drop the file on any static host and point people at the URL.
+To run locally, open `index.html` in a browser. To deploy, drop the file on any static host and point people at the URL.
 
 ## About
 
