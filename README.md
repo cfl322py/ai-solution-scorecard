@@ -2,7 +2,7 @@
 
 A transparent, rule-based tool for triaging AI use cases in regulated industries. Score a use case across feasibility, evaluation rigor, risk, and responsible-by-design, then get a clear **Proceed / Pivot / Scale / Stop** verdict with the risks to watch and the guardrails that fired.
 
-**Live demo:** [add your URL here]
+**Live demo:** https://github.com/cfl322py/ai-solution-scorecard/blob/main/Scorecard.html
 
 ---
 
@@ -75,9 +75,9 @@ This is a decision-support aid, not a decision-maker. The verdict reflects what 
 
 ## Tech
 
-One self-contained HTML file. Vanilla JavaScript, no framework, no build step. The only external dependency is Google Fonts. Deploys as-is to GitHub Pages, Netlify, Vercel, Cloudflare Pages, or any static host.
+One self-contained HTML file. Basic JavaScript, no framework, no build step. The only external dependency is Google Fonts. Deploys as-is to GitHub Pages, Netlify, Vercel, Cloudflare Pages, or any static host.
 
-To run locally, open `index.html` in a browser. To deploy, drop the file on any static host and point people at the URL.
+To run locally, open `Scorecard.html` in a browser. To deploy, drop the file on any static host and point people at the URL.
 
 ## About
 
