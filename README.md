@@ -1,6 +1,6 @@
 # AI Solution Quality & Risk Scorecard
 
-A transparent, rule-based tool for triaging AI use cases in regulated industries. Score a use case across feasibility, evaluation rigor, risk, and responsible-by-design, then get a clear **Proceed / Pivot / Scale / Stop** verdict with the risks to watch and the guardrails that fired.
+A transparent, rule-based tool for triaging AI use cases in regulated industries. Score a use case across feasibility, evaluation rigor, risk, and responsible-by-design, then get a clear **Stop / Pivot / Proceed / Scale** verdict with the risks to watch and the guardrails that fired.
 
 **Live demo:** https://cfl322py.github.io/ai-solution-scorecard/
 
@@ -8,22 +8,22 @@ A transparent, rule-based tool for triaging AI use cases in regulated industries
 
 ## Why I built it
 
-Most AI pilots in pharma stall for the same reason. Nobody scored them honestly before the build started. A use case that sounds promising in a workshop turns out to have no way to measure whether its outputs are correct, or it sends patient data to a third-party model, or it automates a decision a regulator expects a person to make.
+Most AI pilots in pharma stall for the same reason. Nobody scored them honestly before the build started. A use case that sounds promising in theory turns out to have no way to measure whether its outputs are sound so the work suffers, or on the other extreme it automates a decision where human judgment is still very much needed in the loop.
 
-I wanted a simple way to ask those questions up front, in language a regulated-industry team already uses, and to get back a defensible recommendation instead of a gut call.
+I wanted a simple way to ask those questions up front, in language a regulated-industry team already uses, and to get back a defensible recommendation.
 
 ## What it does
 
 You describe a use case and answer a short set of questions. The tool returns:
 
 - A composite quality score out of 100
-- A Proceed / Pivot / Scale / Stop verdict
+- A Stop / Pivot / Proceed / Scale verdict
 - A breakdown across the four dimensions
 - The top risks to watch, ranked by severity
 - A plain-language rationale, assembled from your answers
 - Any responsible-AI guardrails that fired, and why
 
-Four worked examples load with one click, one for each verdict, all drawn from clinical data and digital health: ML-assisted CDISC mapping (Scale), GenAI drafting of data management plans (Proceed), autonomous EDC query resolution (Pivot), and autonomous eligibility screening in a decentralized trial (Stop). You can see how the same engine separates a low-risk internal tool from a high-stakes autonomous one.
+Four worked examples load with one click, one demonstrating each verdict, all drawn from clinical data and digital health: ML-assisted CDISC mapping (Scale), GenAI drafting of data management plans (Proceed), autonomous EDC query resolution (Pivot), and autonomous eligibility screening in a decentralized trial (Stop). You can see how the same engine separates a low-risk internal tool from a high-stakes autonomous one.
 
 ## Design decisions
 
@@ -45,10 +45,10 @@ Each dimension is scored from its questions on a 0 to 100 scale. The composite i
 
 The live tool is a rapid triage: it surfaces the factors that move a verdict the most and applies neutral defaults to the rest, so you get an answer fast. The full rubric behind the engine weighs:
 
-- **Feasibility:** problem definition and success metric, data availability and access, technical approach maturity.
+- **Feasibility:** problem definition and success metric, data availability and access, in technical approach.
 - **Evaluation:** whether an evaluation method exists, and whether there is a ground-truth or expert benchmark to measure against.
 - **Risk and failure modes:** hallucination and factual error, data leakage, workflow fit and adoption, scalability, vendor overclaim and lock-in, and the consequence if the system is wrong.
-- **Responsible-by-design:** privacy and GDPR handling, auditability and traceability, GxP and regulatory validation fit, human oversight matched to the stakes, and bias and subgroup fairness.
+- **Responsible-by-design:** data privacy and handling, auditability and traceability, GxP and regulatory validation fit, human oversight matched to the stakes, and bias checks along with subgroup fairness.
 
 ## Methodology and assumptions
 
@@ -63,7 +63,7 @@ A few assumptions are stated rather than hidden:
 
 ## How I built it
 
-I designed the rubric. The dimensions, the questions, the severity levels, the gating logic, and the weighting come from my work in clinical data management and digital health inside GxP-regulated environments. That judgment is the part that matters, and it is mine.
+I designed the rubric. The dimensions, the questions, the severity levels, the gating logic, and the weighting come from my experience in clinical data management and digital health inside highly-regulated environments. This judgment in design choices is the part that matters.
 
 I used Claude to generate the implementation. I specified the model, reviewed the logic, and wrote a small test that runs all four examples through the scoring engine to confirm each produces the intended verdict before shipping. The code is AI-assisted. The criteria, the decisions, and the verification are my own.
 
@@ -81,7 +81,7 @@ To run locally, open `index.html` in a browser. To deploy, drop the file on any 
 
 ## About
 
-I am Caroline Flessa, MPH, a clinical data and digital health professional. I work on data quality, EDC and eCOA, CDISC standards, and the responsible use of AI and patient-generated data in regulated settings.
+I am Caroline Flessa, MPH, a clinical data and digital health professional. I work on clinical data governance, EDC and eCOA implementations, CDISC standards in clinical data review, and have become much more interested in responsible uses of AI in regulated research settings. Please reach out with any questions or comments.
 
 ---
 
