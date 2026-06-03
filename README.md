@@ -2,7 +2,7 @@
 
 A transparent, rule-based tool for triaging AI use cases in regulated industries. Score a use case across feasibility, evaluation rigor, risk, and responsible-by-design, then get a clear **Proceed / Pivot / Scale / Stop** verdict with the risks to watch and the guardrails that fired.
 
-**Live demo:** (https://cfl322py.github.io/ai-solution-scorecard/Scorecard.html)
+**Live demo:** https://cfl322py.github.io/ai-solution-scorecard/
 
 ---
 
