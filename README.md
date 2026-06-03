@@ -81,9 +81,7 @@ To run locally, open `Scorecard.html` in a browser. To deploy, drop the file on 
 
 ## About
 
-I am Caroline Flessa, MPH, an associate-director-level clinical data and digital health professional. I work on data quality, EDC and eCOA, CDISC standards, and the responsible use of AI and patient-generated data in regulated settings.
-
-[LinkedIn] · [email]
+I am Caroline Flessa, MPH, a clinical data and digital health professional. I work on data quality, EDC and eCOA, CDISC standards, and the responsible use of AI and patient-generated data in regulated settings.
 
 ---
 
