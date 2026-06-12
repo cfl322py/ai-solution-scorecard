@@ -86,3 +86,6 @@ I am Caroline Flessa, MPH, a clinical data and digital health professional. I wo
 ---
 
 *Built with AI assistance and human judgment. The scoring methodology is my own; the implementation was generated with Claude and verified by me.*
+
+## License
+© 2026 Caroline Flessa. All rights reserved. See LICENSE. Made available for demonstration and evaluation only.
