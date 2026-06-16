@@ -1,6 +1,6 @@
 # Terms of Use and Disclaimer
 
-_Last updated: 16-Jun-2026
+Last updated: 16-Jun-2026
 
 The AI Solution Quality and Risk Scorecard ("the tool") is a free, browser-based educational tool created by Caroline Flessa, MPH. By using the tool, you agree to the following.
 
